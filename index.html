@@ -3,83 +3,137 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Spiral Mountain Tour Tracker</title>
+    <title>DMO Tour Tracker</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #121212; color: #e0e0e0; display: flex; justify-content: center; padding: 20px; }
-        .container { width: 100%; max-width: 600px; background: #1e1e1e; padding: 20px; border-radius: 12px; border: 1px solid #333; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        h2 { text-align: center; color: #00d4ff; margin-bottom: 5px; }
-        .server-time { text-align: center; font-size: 1.2rem; margin-bottom: 20px; color: #888; }
-        .boss-card { display: flex; justify-content: space-between; align-items: center; padding: 15px; margin-bottom: 10px; background: #252525; border-radius: 8px; transition: 0.3s; border-left: 5px solid #444; }
-        .boss-card.active { border-left-color: #00ff88; background: #2a352f; transform: scale(1.02); }
-        .boss-info { flex-grow: 1; }
-        .boss-name { font-weight: bold; font-size: 1.1rem; color: #fff; }
-        .boss-map { font-size: 0.85rem; color: #aaa; }
-        .boss-buff { font-size: 0.9rem; color: #ffcc00; font-weight: bold; }
-        .timer { font-family: 'Courier New', Courier, monospace; font-size: 1.4rem; color: #00d4ff; min-width: 100px; text-align: right; }
+        :root { --bg: #0f0f0f; --card: #1a1a1a; --primary: #00d4ff; --active: #00ff88; --text: #e0e0e0; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); display: flex; justify-content: center; padding: 20px; margin: 0; }
+        .container { width: 100%; max-width: 500px; }
+        h2 { border-bottom: 2px solid #333; padding-bottom: 10px; color: var(--primary); font-size: 1.2rem; text-transform: uppercase; letter-spacing: 1px; }
+        .server-time { text-align: center; font-size: 1.5rem; margin-bottom: 30px; font-weight: bold; background: #222; padding: 10px; border-radius: 8px; border: 1px solid #333; }
+        .section { margin-bottom: 40px; }
+        .boss-card { display: flex; justify-content: space-between; align-items: center; padding: 12px 18px; margin-bottom: 10px; background: var(--card); border-radius: 10px; border-left: 4px solid #444; transition: all 0.3s ease; }
+        .boss-card.upcoming { border-left-color: var(--primary); background: #1e262b; }
+        .boss-card.active { border-left-color: var(--active); background: #1a2b22; transform: scale(1.02); }
+        .boss-info { line-height: 1.4; }
+        .boss-name { font-weight: 800; font-size: 1.1rem; }
+        .boss-map { font-size: 0.8rem; color: #888; }
+        .boss-buff { font-size: 0.85rem; color: #ffcc00; font-weight: bold; }
+        .timer { font-family: 'Monaco', monospace; font-size: 1.3rem; color: var(--primary); font-weight: bold; }
+        .empty-msg { color: #555; font-style: italic; text-align: center; padding: 10px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>Spiral Mountain Tour</h2>
-    <div class="server-time" id="serverTime">UTC: 00:00:00</div>
-    
-    <div id="bossList">
-        </div>
+    <div class="server-time" id="serverTime">UTC 00:00:00</div>
+
+    <div class="section">
+        <h2>🔔 Upcoming Tours ( < 15m )</h2>
+        <div id="upcomingList"></div>
+    </div>
+
+    <div class="section">
+        <h2>🗺️ All Tours</h2>
+        <div id="fullList"></div>
+    </div>
 </div>
 
 <script>
-    const bosses = [
-        { name: "Shellmon", map: "Forest of Beginning", buff: "SK Buff", minute: 0 },
-        { name: "Gerbemon", map: "Forest of Marionette", buff: "TA Buff", minute: 6 },
-        { name: "Megadramon", map: "Metal Empire", buff: "AA Buff", minute: 12 },
-        { name: "LadyDevimon", map: "Nightmare Top", buff: "SUP Buff", minute: 18 }
+    const tours = [
+        // Spiral Mountain - Every 1 Hour (6m offsets)
+        { name: "Shellmon", map: "Forest of Beginning", buff: "SK Buff", type: "hourly", offset: 0 },
+        { name: "Gerbemon", map: "Forest of Marionette", buff: "TA Buff", type: "hourly", offset: 6 },
+        { name: "Megadramon", map: "Metal Empire", buff: "AA Buff", type: "hourly", offset: 12 },
+        { name: "LadyDevimon", map: "Nightmare Top", buff: "SUP Buff", type: "hourly", offset: 18 },
+        
+        // Forest Tour - Every 1.5 Hours (90 mins)
+        // Ref: 19:35 UTC is a known spawn time
+        { name: "Orochimon", map: "Forest", buff: "No Buff", type: "interval", interval: 90, refMinute: 1175 } // 1175 is 19:35 in minutes from 00:00
     ];
 
-    function updateTimers() {
+    function getNextSpawn(tour) {
         const now = new Date();
-        const utcMinutes = now.getUTCMinutes();
-        const utcSeconds = now.getUTCSeconds();
-        
-        document.getElementById('serverTime').innerText = `UTC: ${now.toUTCString().split(' ')[4]}`;
+        const nowInMinutes = (now.getUTCHours() * 60) + now.getUTCMinutes();
+        const nowInSeconds = (nowInMinutes * 60) + now.getUTCSeconds();
 
-        let html = "";
-        bosses.forEach(boss => {
-            // Calculate time until next spawn
-            let targetMinute = boss.minute;
-            let diffMinutes = targetMinute - utcMinutes;
-            let diffSeconds = 0 - utcSeconds;
+        let nextSpawnSeconds = 0;
 
-            if (diffSeconds < 0) {
-                diffSeconds += 60;
-                diffMinutes--;
+        if (tour.type === "hourly") {
+            let targetMinutes = tour.offset;
+            if (nowInMinutes >= targetMinutes && now.getUTCSeconds() > 0) {
+                nextSpawnSeconds = (targetMinutes + 60) * 60;
+            } else {
+                nextSpawnSeconds = targetMinutes * 60;
             }
-            if (diffMinutes < 0) {
-                diffMinutes += 60;
-            }
-
-            // Formatting time string
-            let timeStr = `${String(diffMinutes).padStart(2, '0')}:${String(diffSeconds).padStart(2, '0')}`;
+            // Logic to handle daily wrap around for hourly
+            if (nextSpawnSeconds <= nowInSeconds) nextSpawnSeconds += 3600;
+        } 
+        else if (tour.type === "interval") {
+            const intervalSec = tour.interval * 60;
+            const refSec = tour.refMinute * 60;
             
-            // Highlight if boss is spawning within the next 2 minutes
-            let isActive = (diffMinutes === 0 || diffMinutes >= 58);
+            // Calculate how many intervals since the reference time
+            let diff = nowInSeconds - refSec;
+            let intervalsPassed = Math.ceil(diff / intervalSec);
+            nextSpawnSeconds = refSec + (intervalsPassed * intervalSec);
+            
+            // Handle day wrap around (modulo 24h)
+            const daySec = 86400;
+            while (nextSpawnSeconds <= nowInSeconds) {
+                nextSpawnSeconds += intervalSec;
+            }
+            nextSpawnSeconds = nextSpawnSeconds % daySec;
+            if (nextSpawnSeconds < 0) nextSpawnSeconds += daySec;
+        }
 
-            html += `
-                <div class="boss-card ${isActive ? 'active' : ''}">
-                    <div class="boss-info">
-                        <div class="boss-name">${boss.name}</div>
-                        <div class="boss-map">${boss.map}</div>
-                        <div class="boss-buff">${boss.buff}</div>
-                    </div>
-                    <div class="timer">${timeStr}</div>
-                </div>
-            `;
-        });
-        document.getElementById('bossList').innerHTML = html;
+        let totalDiffSeconds = nextSpawnSeconds - nowInSeconds;
+        if (totalDiffSeconds < 0) totalDiffSeconds += 86400;
+
+        return totalDiffSeconds;
     }
 
-    setInterval(updateTimers, 1000);
-    updateTimers();
+    function formatTime(seconds) {
+        const m = Math.floor(seconds / 60);
+        const s = seconds % 60;
+        return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    }
+
+    function update() {
+        const now = new Date();
+        document.getElementById('serverTime').innerText = `UTC ${now.toUTCString().split(' ')[4]}`;
+
+        let upcomingHtml = "";
+        let fullHtml = "";
+
+        // Sort tours by which is coming sooner
+        const sortedTours = tours.map(t => ({ ...t, timeLeft: getNextSpawn(t) }))
+                                 .sort((a, b) => a.timeLeft - b.timeLeft);
+
+        sortedTours.forEach(tour => {
+            const isUpcoming = tour.timeLeft < 900; // 15 minutes
+            const isActive = tour.timeLeft < 60;   // 1 minute (spawning now)
+            
+            const cardHtml = `
+                <div class="boss-card ${isActive ? 'active' : (isUpcoming ? 'upcoming' : '')}">
+                    <div class="boss-info">
+                        <div class="boss-name">${tour.name}</div>
+                        <div class="boss-map">${tour.map}</div>
+                        <div class="boss-buff">${tour.buff}</div>
+                    </div>
+                    <div class="timer">${formatTime(tour.timeLeft)}</div>
+                </div>
+            `;
+
+            if (isUpcoming) upcomingHtml += cardHtml;
+            fullHtml += cardHtml;
+        });
+
+        document.getElementById('upcomingList').innerHTML = upcomingHtml || '<div class="empty-msg">No tours starting soon...</div>';
+        document.getElementById('fullList').innerHTML = fullHtml;
+    }
+
+    setInterval(update, 1000);
+    update();
 </script>
 
 </body>
