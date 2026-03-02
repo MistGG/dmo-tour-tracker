@@ -301,11 +301,12 @@
             text-transform: uppercase;
             letter-spacing: 1px;
             margin-top: 4px;
-            padding: 2px 6px;
+            padding: 2px 8px;
             background: rgba(255, 204, 0, 0.1);
             border: 1px solid var(--accent);
             border-radius: 4px;
             animation: pulse 1.5s infinite;
+            white-space: nowrap;
         }
 
         @keyframes pulse {
@@ -502,21 +503,21 @@
 <script>
     // Configuration
     const tours = [
-        // SPIRAL TOURS (1h Interval, 6m gap, 6m live)
+        // SPIRAL TOURS (1h Interval, 6m live)
         { id: 'shellmon', name: "Shellmon", map: "Forest of Beginning", buff: "SK Buff", type: "hourly", offset: 0, liveDuration: 360, label: "Spiral Tour", lClass: "label-spiral" },
         { id: 'gerbemon', name: "Gerbemon", map: "Forest of Marionette", buff: "TA Buff", type: "hourly", offset: 6, liveDuration: 360, label: "Spiral Tour", lClass: "label-spiral" },
         { id: 'megadramon', name: "Megadramon", map: "Metal Empire", buff: "AA Buff", type: "hourly", offset: 12, liveDuration: 360, label: "Spiral Tour", lClass: "label-spiral" },
         { id: 'ladydevimon', name: "LadyDevimon", map: "Nightmare Top", buff: "SUP Buff", type: "hourly", offset: 18, liveDuration: 360, label: "Spiral Tour", lClass: "label-spiral" },
         
-        // FOREST TOURS (1.5h Interval, 2m gap, 1m 45s live)
-        { id: 'orochimon', name: "Orochimon", map: "Forest", buff: "No Buff", type: "interval", interval: 90, refMinute: 1175, liveDuration: 105, label: "Forest Tour", lClass: "label-forest" },
-        { id: 'mugendramon', name: "Mugendramon", map: "Forest", buff: "No Buff", type: "interval", interval: 90, refMinute: 1177, liveDuration: 105, label: "Forest Tour", lClass: "label-forest" },
-        { id: 'chaosdramon', name: "Chaosdramon", map: "Forest", buff: "No Buff", type: "interval", interval: 90, refMinute: 1179, liveDuration: 105, label: "Forest Tour", lClass: "label-forest" },
-        { id: 'banchouleomon', name: "BanchouLeomon", map: "Forest", buff: "No Buff", type: "interval", interval: 90, refMinute: 1181, liveDuration: 105, label: "Forest Tour", lClass: "label-forest" },
-        { id: 'beelzebumon_1', name: "Beelzebumon", map: "Forest", buff: "No Buff", type: "interval", interval: 90, refMinute: 1183, liveDuration: 105, label: "Forest Tour", lClass: "label-forest" },
-        { id: 'megidramon', name: "Megidramon", map: "Forest", buff: "No Buff", type: "interval", interval: 90, refMinute: 1185, liveDuration: 105, label: "Forest Tour", lClass: "label-forest" },
-        { id: 'beelzebumon_2', name: "Beelzebumon", map: "Forest", buff: "No Buff", type: "interval", interval: 90, refMinute: 1187, liveDuration: 105, label: "Forest Tour", lClass: "label-forest" },
-        { id: 'zhuqiaomon', name: "Zhuqiaomon", map: "Forest", buff: "No Buff", type: "interval", interval: 90, refMinute: 1189, liveDuration: 105, label: "Forest Tour", lClass: "label-forest" }
+        // FOREST TOURS (1.5h Interval, 2m staggered, 1m 40s live)
+        { id: 'orochimon', name: "Orochimon", map: "Forest", buff: "No Buff", type: "interval", interval: 90, refMinute: 1175, liveDuration: 100, label: "Forest Tour", lClass: "label-forest" },
+        { id: 'mugendramon', name: "Mugendramon", map: "Forest", buff: "No Buff", type: "interval", interval: 90, refMinute: 1177, liveDuration: 100, label: "Forest Tour", lClass: "label-forest" },
+        { id: 'chaosdramon', name: "Chaosdramon", map: "Forest", buff: "No Buff", type: "interval", interval: 90, refMinute: 1179, liveDuration: 100, label: "Forest Tour", lClass: "label-forest" },
+        { id: 'banchouleomon', name: "BanchouLeomon", map: "Forest", buff: "No Buff", type: "interval", interval: 90, refMinute: 1181, liveDuration: 100, label: "Forest Tour", lClass: "label-forest" },
+        { id: 'beelzebumon_1', name: "Beelzebumon", map: "Forest", buff: "No Buff", type: "interval", interval: 90, refMinute: 1183, liveDuration: 100, label: "Forest Tour", lClass: "label-forest" },
+        { id: 'megidramon', name: "Megidramon", map: "Forest", buff: "No Buff", type: "interval", interval: 90, refMinute: 1185, liveDuration: 100, label: "Forest Tour", lClass: "label-forest" },
+        { id: 'beelzebumon_2', name: "Beelzebumon", map: "Forest", buff: "No Buff", type: "interval", interval: 90, refMinute: 1187, liveDuration: 100, label: "Forest Tour", lClass: "label-forest" },
+        { id: 'zhuqiaomon', name: "Zhuqiaomon", map: "Forest", buff: "No Buff", type: "interval", interval: 90, refMinute: 1189, liveDuration: 100, label: "Forest Tour", lClass: "label-forest" }
     ];
 
     const specialEvents = [
@@ -637,9 +638,15 @@
             
             let channel = null;
             if (isLive && t.label === 'Spiral Tour') {
-                if (timeSinceLastSpawn < 120) channel = "ch 0";
-                else if (timeSinceLastSpawn < 240) channel = "ch 1";
-                else channel = "ch 2";
+                // Segment 1: CH 0 (0-100s) then Swap (100-120s)
+                if (timeSinceLastSpawn < 100) channel = "ch 0";
+                else if (timeSinceLastSpawn < 120) channel = "Swap to Ch 1";
+                // Segment 2: CH 1 (120-220s) then Swap (220-240s)
+                else if (timeSinceLastSpawn < 220) channel = "ch 1";
+                else if (timeSinceLastSpawn < 240) channel = "Swap to Ch 2";
+                // Segment 3: CH 2 (240-340s) then Swap/Finished (340-360s)
+                else if (timeSinceLastSpawn < 340) channel = "ch 2";
+                else channel = "Finished";
             }
 
             return { ...t, timeLeft, isLive, liveRemaining: isLive ? (t.liveDuration - timeSinceLastSpawn) : 0, channel };
@@ -649,7 +656,8 @@
         const eventData = processItems(specialEvents);
 
         const checkNotify = (current, previousList, settingKey, onlyBossId = null) => {
-            if (!document.getElementById(settingKey).checked) return;
+            const settingEl = document.getElementById(settingKey);
+            if (!settingEl || !settingEl.checked) return;
             const prev = previousList.find(p => p.id === current.id);
             if (!prev) return;
             if (prev.timeLeft > leadSec && current.timeLeft <= leadSec && current.timeLeft > 0) {
