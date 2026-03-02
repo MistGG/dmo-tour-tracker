@@ -202,7 +202,7 @@
             margin-bottom: 20px;
         }
 
-        .settings-header h3 { margin: 0; color: var(--primary); font-size: 1rem; text-transform: uppercase; letter-spacing: 1px; }
+        .settings-header h3 { margin: 0; color: var(--primary); font-size: 1rem; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 8px; }
 
         .close-btn { background: none; border: none; color: var(--text-dim); cursor: pointer; font-size: 1.5rem; }
 
@@ -285,7 +285,7 @@
 <div id="settingsOverlay" onclick="closeSettings(event)">
     <div class="settings-modal" onclick="event.stopPropagation()">
         <div class="settings-header">
-            <h3>Settings</h3>
+            <h3>Settings <span style="font-size: 0.7rem; color: var(--text-dim); font-weight: normal; text-transform: none;">(Autosaves)</span></h3>
             <button class="close-btn" onclick="document.getElementById('settingsOverlay').style.display='none'">&times;</button>
         </div>
         
@@ -461,7 +461,6 @@
             if (!document.getElementById(settingKey).checked) return;
             const prev = previousList.find(p => p.id === current.id);
             if (!prev) return;
-            // Only trigger if we just crossed the leadSec and didn't cross into the past
             if (prev.timeLeft > leadSec && current.timeLeft <= leadSec && current.timeLeft > 0) {
                 if (!onlyBossId || current.id === onlyBossId) playBeep();
             }
@@ -490,14 +489,26 @@
             </div>
         `;
 
+        // Handle Sections with exclusion logic
         tourData.forEach(t => {
-            if (t.isLive) liveHtml += renderCard(t);
-            else if (t.timeLeft < 900) upcomingHtml += renderCard(t);
+            if (t.isLive) {
+                liveHtml += renderCard(t);
+            } else if (t.timeLeft < 900) {
+                upcomingHtml += renderCard(t);
+            } else {
+                // If it's NOT live and NOT upcoming, it goes in Full Schedule
+                fullHtml += renderCard(t);
+            }
         });
 
         eventData.forEach(e => eventHtml += renderCard(e, 'event-active'));
 
-        [...tourData].sort((a, b) => (a.isLive === b.isLive) ? a.timeLeft - b.timeLeft : (a.isLive ? 1 : -1))
+        // Sort the Full Schedule part (which is already filtered in the loop above)
+        // Note: The loop above generates fullHtml unsorted, let's fix that.
+        fullHtml = "";
+        tourData
+            .filter(t => !t.isLive && t.timeLeft >= 900)
+            .sort((a, b) => a.timeLeft - b.timeLeft)
             .forEach(t => fullHtml += renderCard(t));
 
         document.getElementById('liveSection').style.display = liveHtml ? 'block' : 'none';
