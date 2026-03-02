@@ -7,6 +7,8 @@
     <style>
         :root { 
             --bg: #0a0a0c; 
+            --header-bg: #111114;
+            --sidebar-bg: #111114;
             --card: #151518; 
             --primary: #00d4ff; 
             --active: #00ff88; 
@@ -21,10 +23,14 @@
             --event: #ff9f43;
             --discord: #5865F2;
             --discord-hover: #4752c4;
+            --nav-width: 240px;
+            --header-height: 60px;
         }
 
         [data-theme="light"] {
             --bg: #f4f7f9;
+            --header-bg: #ffffff;
+            --sidebar-bg: #ffffff;
             --card: #ffffff;
             --primary: #0088cc;
             --active: #27ae60;
@@ -38,27 +44,106 @@
             font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
             background: var(--bg); 
             color: var(--text); 
-            display: flex; 
-            justify-content: center; 
-            padding: 20px; 
             margin: 0; 
             transition: background 0.3s, color 0.3s;
-        }
-        
-        .container { width: 100%; max-width: 450px; position: relative; }
-
-        /* Updated Top Nav for Inline Layout */
-        .top-nav {
             display: flex;
-            justify-content: space-between;
+            min-height: 100vh;
+        }
+
+        /* --- Sidebar Layout --- */
+        .sidebar {
+            width: var(--nav-width);
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--border);
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            display: flex;
+            flex-direction: column;
+            z-index: 1001;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-header {
+            height: var(--header-height);
+            display: flex;
             align-items: center;
-            margin-bottom: 15px;
-            gap: 10px;
+            padding: 0 20px;
+            font-weight: 900;
+            letter-spacing: 1px;
+            color: var(--primary);
+            border-bottom: 1px solid var(--border);
+            text-transform: uppercase;
         }
 
-        .nav-right {
+        .nav-links {
+            padding: 20px 10px;
+            flex-grow: 1;
+        }
+
+        .nav-item {
             display: flex;
-            gap: 10px;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 15px;
+            border-radius: 8px;
+            text-decoration: none;
+            color: var(--text);
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+            transition: all 0.2s;
+        }
+
+        .nav-item.active {
+            background: rgba(0, 212, 255, 0.1);
+            color: var(--primary);
+        }
+
+        .nav-item:hover:not(.active) {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .nav-icon { width: 20px; height: 20px; fill: currentColor; }
+
+        /* --- Main Content Area --- */
+        .main-wrapper {
+            flex-grow: 1;
+            margin-left: var(--nav-width);
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- Global Top Header --- */
+        .global-header {
+            height: var(--header-height);
+            background: var(--header-bg);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .page-title-mobile { display: none; font-weight: 800; color: var(--primary); }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-left: auto;
+        }
+
+        /* --- Content Container --- */
+        .content-area {
+            padding: 30px 20px;
+            max-width: 500px;
+            margin: 0 auto;
+            width: 100%;
         }
 
         /* Discord Button Styling */
@@ -68,7 +153,7 @@
             gap: 8px;
             background: var(--discord);
             color: white;
-            padding: 6px 12px;
+            padding: 8px 14px;
             border-radius: 8px;
             text-decoration: none;
             font-size: 0.75rem;
@@ -76,23 +161,13 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
             transition: all 0.2s ease;
-            border: none;
             box-shadow: 0 4px 10px rgba(88, 101, 242, 0.2);
         }
 
-        .discord-btn:hover {
-            background: var(--discord-hover);
-            transform: translateY(-1px);
-            box-shadow: 0 6px 15px rgba(88, 101, 242, 0.3);
-        }
+        .discord-btn:hover { background: var(--discord-hover); transform: translateY(-1px); }
+        .discord-gif { width: 20px; height: 20px; border-radius: 4px; display: block; }
 
-        .discord-gif {
-            width: 20px;
-            height: 20px;
-            border-radius: 4px;
-            display: block;
-        }
-
+        /* Icon Buttons */
         .icon-btn {
             background: var(--card);
             border: 1px solid var(--border);
@@ -105,14 +180,32 @@
             justify-content: center;
             transition: 0.2s;
         }
+        .icon-btn:hover { color: var(--primary); border-color: var(--primary); }
+        .icon-btn svg { width: 18px; height: 18px; fill: currentColor; }
 
-        .icon-btn:hover {
-            color: var(--primary);
-            border-color: var(--primary);
+        /* --- Timers Specific Styling --- */
+        .timers-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
         }
 
-        .icon-btn svg { width: 18px; height: 18px; fill: currentColor; }
-        
+        .server-time-card { 
+            text-align: center; 
+            font-size: 1.8rem; 
+            margin-bottom: 30px; 
+            font-weight: 900; 
+            background: var(--card);
+            padding: 20px; 
+            border-radius: 12px; 
+            border: 1px solid var(--border); 
+            color: var(--text); 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            font-family: 'Courier New', monospace;
+        }
+        .utc-label { font-size: 0.7rem; color: var(--text-dim); display: block; margin-top: -5px; letter-spacing: 3px; }
+
         h2 { 
             border-bottom: 1px solid var(--border); 
             padding-bottom: 8px; 
@@ -120,28 +213,11 @@
             font-size: 0.85rem; 
             text-transform: uppercase; 
             letter-spacing: 2px; 
-            margin: 20px 0 15px 0; 
+            margin: 30px 0 15px 0; 
             display: flex;
             align-items: center;
         }
-        
         h2::before { content: '◈'; margin-right: 8px; font-size: 0.7rem; }
-
-        .server-time { 
-            text-align: center; 
-            font-size: 1.8rem; 
-            margin-bottom: 10px; 
-            font-weight: 900; 
-            background: var(--card);
-            padding: 15px; 
-            border-radius: 12px; 
-            border: 1px solid var(--border); 
-            color: var(--text); 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            font-family: 'Courier New', monospace;
-        }
-
-        .utc-label { font-size: 0.7rem; color: var(--text-dim); display: block; margin-top: -5px; letter-spacing: 3px; }
 
         .boss-card { 
             position: relative; 
@@ -178,11 +254,11 @@
             border-color: var(--active);
             box-shadow: 0 0 15px rgba(0, 255, 136, 0.1);
         }
-
         .boss-card.event-active {
             border-left-color: var(--event);
             border-color: var(--event);
             background: rgba(255, 159, 67, 0.05);
+            box-shadow: 0 0 15px rgba(255, 159, 67, 0.1);
         }
         
         .boss-info { line-height: 1.4; }
@@ -198,27 +274,21 @@
             min-width: 90px; 
             text-align: right; 
         }
-        
-        .active .timer { color: var(--active); }
         .active .timer::after { content: ' LIVE'; font-size: 0.5rem; display: block; margin-top: -5px; }
-
-        .event-active .timer { color: var(--event); }
         .event-active .timer::after { content: ' OPEN'; font-size: 0.5rem; display: block; margin-top: -5px; }
 
         .empty-msg { color: var(--text-dim); font-style: italic; text-align: center; padding: 20px; font-size: 0.9rem; border: 1px dashed var(--border); border-radius: 10px; }
 
-        /* Settings Modal */
+        /* Settings Modal Overlay */
         #settingsOverlay {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
             background: var(--overlay);
             display: none;
             justify-content: center;
             align-items: center;
-            z-index: 1000;
+            z-index: 2000;
             backdrop-filter: blur(5px);
         }
 
@@ -233,10 +303,7 @@
             animation: slideIn 0.3s ease-out;
         }
 
-        @keyframes slideIn {
-            from { transform: translateY(20px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
+        @keyframes slideIn { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
         .settings-header {
             display: flex;
@@ -244,9 +311,7 @@
             align-items: center;
             margin-bottom: 20px;
         }
-
         .settings-header h3 { margin: 0; color: var(--primary); font-size: 1rem; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 8px; }
-
         .close-btn { background: none; border: none; color: var(--text-dim); cursor: pointer; font-size: 1.5rem; }
 
         .setting-group {
@@ -256,9 +321,7 @@
             margin-bottom: 16px;
             font-size: 0.95rem;
         }
-
         .setting-group label { cursor: pointer; flex-grow: 1; font-weight: 500; }
-
         .lead-time-input {
             background: var(--bg);
             border: 1px solid var(--border);
@@ -283,55 +346,82 @@
             font-weight: bold;
             transition: filter 0.2s;
         }
-
         .test-btn:hover { filter: brightness(1.1); }
+
+        /* Responsive Mobile Tweak */
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); }
+            .main-wrapper { margin-left: 0; }
+            .page-title-mobile { display: block; }
+        }
     </style>
 </head>
 <body data-theme="dark">
 
-<div class="container">
-    <nav class="top-nav">
-        <!-- Discord Link on the left -->
-        <a href="https://discord.gg/7pn8YUFkcG" target="_blank" class="discord-btn">
-            <img src="images/lostangels.gif" alt="" class="discord-gif" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3670/3670157.png'">
-            <span>Join Lost Angels</span>
+<!-- Sidebar Navigation -->
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        DMW STUFF
+    </div>
+    <nav class="nav-links">
+        <a href="#" class="nav-item active">
+            <svg class="nav-icon" viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
+            Timers
         </a>
+    </nav>
+</aside>
 
-        <!-- Icons on the right -->
-        <div class="nav-right">
+<div class="main-wrapper">
+    <!-- Global Header -->
+    <header class="global-header">
+        <div class="page-title-mobile">TIMERS</div>
+        
+        <div class="header-right">
+            <a href="https://discord.gg/7pn8YUFkcG" target="_blank" class="discord-btn">
+                <img src="images/lostangels.gif" alt="" class="discord-gif" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3670/3670157.png'">
+                <span>Join Lost Angels</span>
+            </a>
             <button class="icon-btn" onclick="toggleTheme()" title="Toggle Theme">
                 <svg id="themeIcon" viewBox="0 0 24 24"><path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.99 4.58a.996.996 0 00-1.41 0 .996.996 0 000 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41L5.99 4.58zm12.37 12.37a.996.996 0 00-1.41 0 .996.996 0 000 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41l-1.06-1.06zm1.06-10.96a.996.996 0 000-1.41.996.996 0 00-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06zM7.05 18.36a.996.996 0 000-1.41.996.996 0 00-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06z"/></svg>
             </button>
-            <button class="icon-btn" onclick="openSettings()" title="Settings">
+        </div>
+    </header>
+
+    <!-- Main View -->
+    <main class="content-area">
+        <div class="timers-header">
+            <h1 style="margin:0; font-size: 1.2rem; letter-spacing: 1px;">TOUR TIMERS</h1>
+            <button class="icon-btn" onclick="openSettings()" title="Timer Settings">
                 <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 00.12-.61l-1.92-3.32a.488.488 0 00-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 00-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 00-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
             </button>
         </div>
-    </nav>
 
-    <div class="server-time">
-        <span id="serverTime">00:00:00</span>
-        <span class="utc-label">SERVER UTC</span>
-    </div>
+        <div class="server-time-card">
+            <span id="serverTime">00:00:00</span>
+            <span class="utc-label">SERVER UTC</span>
+        </div>
 
-    <div class="section" id="liveSection" style="display:none;">
-        <h2 style="color:var(--active);">🔥 Live Tours</h2>
-        <div id="liveList"></div>
-    </div>
+        <div class="section" id="liveSection" style="display:none;">
+            <h2 style="color:var(--active);">🔥 Live Tours</h2>
+            <div id="liveList"></div>
+        </div>
 
-    <div class="section">
-        <h2 style="color:var(--event);">🌟 Special Event</h2>
-        <div id="eventList"></div>
-    </div>
+        <div class="section">
+            <h2 style="color:var(--event);">🌟 Special Event</h2>
+            <div id="eventList"></div>
+        </div>
 
-    <div class="section">
-        <h2>🔔 Upcoming Tours</h2>
-        <div id="upcomingList"></div>
-    </div>
+        <div class="section">
+            <h2>🔔 Upcoming Tours</h2>
+            <div id="upcomingList"></div>
+        </div>
 
-    <div class="section">
-        <h2>🗺️ Full Schedule</h2>
-        <div id="fullList"></div>
-    </div>
+        <div class="section">
+            <h2>🗺️ Full Schedule</h2>
+            <div id="fullList"></div>
+        </div>
+    </main>
 </div>
 
 <div id="settingsOverlay" onclick="closeSettings(event)">
@@ -395,17 +485,15 @@
     let lastEventData = [];
     let wakeLock = null;
 
-    // Wake Lock Logic
     async function handleWakeLock(enabled) {
         if (!('wakeLock' in navigator)) return;
         if (enabled) {
             try { wakeLock = await navigator.wakeLock.request('screen'); } catch (err) {}
-        } else {
-            if (wakeLock) { wakeLock.release(); wakeLock = null; }
+        } else if (wakeLock) {
+            wakeLock.release(); wakeLock = null;
         }
     }
 
-    // Audio
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     function playBeep() {
         if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -494,7 +582,9 @@
 
     function update() {
         const now = new Date();
-        document.getElementById('serverTime').innerText = now.toUTCString().split(' ')[4];
+        const sTime = document.getElementById('serverTime');
+        if(sTime) sTime.innerText = now.toUTCString().split(' ')[4];
+        
         const leadSec = (parseInt(document.getElementById('leadTime').value) || 1) * 60;
 
         const processItems = (itemList) => itemList.map(t => {
@@ -508,7 +598,6 @@
         const tourData = processItems(tours);
         const eventData = processItems(specialEvents);
 
-        // Check Notifications using Threshold Crossing Logic
         const checkNotify = (current, previousList, settingKey, onlyBossId = null) => {
             if (!document.getElementById(settingKey).checked) return;
             const prev = previousList.find(p => p.id === current.id);
@@ -528,24 +617,30 @@
 
         let liveHtml = "", upcomingHtml = "", eventHtml = "", fullHtml = "";
 
-        const renderCard = (tour, extraClass = "") => `
-            <div class="boss-card ${tour.isLive ? 'active ' + extraClass : (tour.timeLeft < 900 ? 'upcoming' : '')}">
-                <div class="boss-info">
-                    <span class="tour-label ${tour.lClass}">${tour.label}</span>
-                    <div class="boss-name">${tour.name}</div>
-                    <div class="boss-map">${tour.map}</div>
-                    <div class="boss-buff">${tour.isLive ? (tour.label === 'Special Event' ? 'Window Open' : tour.buff) : tour.buff}</div>
+        const renderCard = (tour, extraClass = "") => {
+            let buffText = "";
+            if (tour.isLive && tour.label === 'Special Event') {
+                buffText = 'Collect your pass!';
+            } else if (tour.buff !== "No Buff") {
+                buffText = tour.buff;
+            }
+
+            return `
+                <div class="boss-card ${tour.isLive ? 'active ' + extraClass : (tour.timeLeft < 900 ? 'upcoming' : '')}">
+                    <div class="boss-info">
+                        <span class="tour-label ${tour.lClass}">${tour.label}</span>
+                        <div class="boss-name">${tour.name}</div>
+                        <div class="boss-map">${tour.map}</div>
+                        ${buffText ? `<div class="boss-buff">${buffText}</div>` : ''}
+                    </div>
+                    <div class="timer">${formatTime(tour.isLive ? tour.liveRemaining : tour.timeLeft)}</div>
                 </div>
-                <div class="timer">${formatTime(tour.isLive ? tour.liveRemaining : tour.timeLeft)}</div>
-            </div>
-        `;
+            `;
+        };
 
         tourData.forEach(t => {
-            if (t.isLive) {
-                liveHtml += renderCard(t);
-            } else if (t.timeLeft < 900) {
-                upcomingHtml += renderCard(t);
-            }
+            if (t.isLive) liveHtml += renderCard(t);
+            else if (t.timeLeft < 900) upcomingHtml += renderCard(t);
         });
 
         eventData.forEach(e => eventHtml += renderCard(e, 'event-active'));
@@ -555,11 +650,20 @@
             .sort((a, b) => a.timeLeft - b.timeLeft)
             .forEach(t => fullHtml += renderCard(t));
 
-        document.getElementById('liveSection').style.display = liveHtml ? 'block' : 'none';
-        document.getElementById('liveList').innerHTML = liveHtml;
-        document.getElementById('eventList').innerHTML = eventHtml;
-        document.getElementById('upcomingList').innerHTML = upcomingHtml || '<div class="empty-msg">No tours starting soon...</div>';
-        document.getElementById('fullList').innerHTML = fullHtml;
+        const lSec = document.getElementById('liveSection');
+        if(lSec) lSec.style.display = liveHtml ? 'block' : 'none';
+        
+        const lList = document.getElementById('liveList');
+        if(lList) lList.innerHTML = liveHtml;
+        
+        const eList = document.getElementById('eventList');
+        if(eList) eList.innerHTML = eventHtml;
+        
+        const uList = document.getElementById('upcomingList');
+        if(uList) uList.innerHTML = upcomingHtml || '<div class="empty-msg">No tours starting soon...</div>';
+        
+        const fList = document.getElementById('fullList');
+        if(fList) fList.innerHTML = fullHtml;
     }
 
     window.onload = () => { loadData(); setInterval(update, 1000); update(); };
