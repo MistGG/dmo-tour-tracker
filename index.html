@@ -49,6 +49,7 @@
             transition: background 0.3s, color 0.3s;
             display: flex;
             min-height: 100vh;
+            overflow-x: hidden;
         }
 
         /* --- Sidebar Layout --- */
@@ -124,6 +125,7 @@
             margin-left: var(--nav-width);
             display: flex;
             flex-direction: column;
+            position: relative;
         }
 
         /* --- Global Top Header --- */
@@ -155,6 +157,8 @@
             max-width: 500px;
             margin: 0 auto;
             width: 100%;
+            position: relative;
+            z-index: 10;
         }
 
         /* Discord Button Styling */
@@ -400,6 +404,46 @@
             padding-bottom: 4px;
         }
 
+        /* --- Event Effects --- */
+        #eventRainContainer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+            overflow: hidden;
+            display: none;
+        }
+
+        .falling-pass {
+            position: absolute;
+            width: 30px;
+            height: auto;
+            opacity: 0.8;
+            filter: drop-shadow(0 0 5px rgba(255, 159, 67, 0.4));
+            animation: fall linear forwards;
+        }
+
+        @keyframes fall {
+            from { transform: translateY(-50px) rotate(0deg); }
+            to { transform: translateY(110vh) rotate(360deg); }
+        }
+
+        #eventShineOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 400px;
+            pointer-events: none;
+            z-index: 0;
+            background: radial-gradient(circle at center top, rgba(255, 159, 67, 0.15) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 2s ease;
+        }
+
         /* Responsive Mobile Tweak */
         @media (max-width: 768px) {
             .sidebar { transform: translateX(-100%); }
@@ -410,6 +454,10 @@
     </style>
 </head>
 <body data-theme="dark">
+
+<!-- Event Visual Elements -->
+<div id="eventShineOverlay"></div>
+<div id="eventRainContainer"></div>
 
 <!-- Sidebar Navigation -->
 <aside class="sidebar" id="sidebar">
@@ -526,6 +574,12 @@
             <input type="checkbox" id="showEvent" checked>
         </div>
 
+        <div class="settings-divider">Special Effects</div>
+        <div class="setting-group">
+            <label for="enableEffects">Enable Event Visuals (Rain/Shine)</label>
+            <input type="checkbox" id="enableEffects" checked>
+        </div>
+
         <div class="settings-divider">Performance</div>
         <div class="setting-group">
             <label for="wakeLock">Keep Screen Awake</label>
@@ -574,6 +628,7 @@
     let lastToursData = [];
     let lastEventData = [];
     let wakeLock = null;
+    let effectInterval = null;
 
     async function handleWakeLock(enabled) {
         if (!('wakeLock' in navigator)) return;
@@ -631,11 +686,12 @@
             showSpiral: document.getElementById('showSpiral').checked,
             showForest: document.getElementById('showForest').checked,
             showTokyo: document.getElementById('showTokyo').checked,
-            showEvent: document.getElementById('showEvent').checked
+            showEvent: document.getElementById('showEvent').checked,
+            enableEffects: document.getElementById('enableEffects').checked
         };
         localStorage.setItem('dmo_tour_settings', JSON.stringify(settings));
         handleWakeLock(settings.wakeLock);
-        update(); // Force refresh lists based on visibility toggles
+        update(); 
     }
 
     function loadData() {
@@ -653,6 +709,7 @@
             if (s.hasOwnProperty('showForest')) document.getElementById('showForest').checked = s.showForest;
             if (s.hasOwnProperty('showTokyo')) document.getElementById('showTokyo').checked = s.showTokyo;
             if (s.hasOwnProperty('showEvent')) document.getElementById('showEvent').checked = s.showEvent;
+            if (s.hasOwnProperty('enableEffects')) document.getElementById('enableEffects').checked = s.enableEffects;
 
             handleWakeLock(!!s.wakeLock);
         }
@@ -661,9 +718,33 @@
         updateThemeIcon(savedTheme);
     }
 
-    document.querySelectorAll('input').forEach(input => {
-        input.addEventListener('change', saveSettings);
-    });
+    function createFallingPass() {
+        const container = document.getElementById('eventRainContainer');
+        if (!container) return;
+        
+        const pass = document.createElement('img');
+        pass.src = 'pass.png';
+        pass.className = 'falling-pass';
+        
+        // Random horizontal position
+        const left = Math.random() * 100;
+        pass.style.left = `${left}vw`;
+        
+        // Random speed
+        const duration = 5 + Math.random() * 10;
+        pass.style.animationDuration = `${duration}s`;
+        
+        // Random size
+        const size = 20 + Math.random() * 20;
+        pass.style.width = `${size}px`;
+
+        container.appendChild(pass);
+        
+        // Clean up after animation
+        setTimeout(() => {
+            if (pass.parentNode) container.removeChild(pass);
+        }, duration * 1000);
+    }
 
     function getNextSpawn(tour) {
         const now = new Date();
@@ -697,16 +778,17 @@
         
         const leadSec = (parseInt(document.getElementById('leadTime').value) || 1) * 60;
         
-        // Visibility Settings
         const visibility = {
             spiral: document.getElementById('showSpiral').checked,
             forest: document.getElementById('showForest').checked,
             tokyo: document.getElementById('showTokyo').checked,
             event: document.getElementById('showEvent').checked
         };
+        
+        const effectsEnabled = document.getElementById('enableEffects').checked;
 
         const processItems = (itemList) => itemList
-            .filter(item => visibility[item.category]) // Filter based on toggle
+            .filter(item => visibility[item.category])
             .map(t => {
                 const timeLeft = getNextSpawn(t);
                 const interval = t.type === 'hourly' ? 3600 : t.interval * 60;
@@ -736,6 +818,27 @@
 
         const tourData = processItems(tours);
         const eventData = processItems(specialEvents);
+
+        // Handle Event Visual Effects
+        const ogPassLive = eventData.some(e => e.id === 'ogpass' && e.isLive);
+        const rainContainer = document.getElementById('eventRainContainer');
+        const shineOverlay = document.getElementById('eventShineOverlay');
+
+        if (ogPassLive && effectsEnabled) {
+            rainContainer.style.display = 'block';
+            shineOverlay.style.opacity = '1';
+            if (!effectInterval) {
+                effectInterval = setInterval(createFallingPass, 800);
+            }
+        } else {
+            if (rainContainer) rainContainer.style.display = 'none';
+            if (shineOverlay) shineOverlay.style.opacity = '0';
+            if (effectInterval) {
+                clearInterval(effectInterval);
+                effectInterval = null;
+            }
+            if (rainContainer) rainContainer.innerHTML = '';
+        }
 
         const checkNotify = (current, previousList, settingKey, onlyBossId = null) => {
             const settingEl = document.getElementById(settingKey);
@@ -794,26 +897,27 @@
             .sort((a, b) => a.timeLeft - b.timeLeft)
             .forEach(t => fullHtml += renderCard(t));
 
-        // Display update
         const lSec = document.getElementById('liveSection');
         if(lSec) lSec.style.display = liveHtml ? 'block' : 'none';
-        
         const lList = document.getElementById('liveList');
         if(lList) lList.innerHTML = liveHtml;
         
-        // Hide event section if categories are toggled off
         const eSec = document.getElementById('eventSection');
         if(eSec) eSec.style.display = visibility.event ? 'block' : 'none';
-
         const eList = document.getElementById('eventList');
         if(eList) eList.innerHTML = eventHtml;
         
         const uList = document.getElementById('upcomingList');
         if(uList) uList.innerHTML = upcomingHtml || '<div class="empty-msg">No tours starting soon...</div>';
-        
         const fList = document.getElementById('fullList');
         if(fList) fList.innerHTML = fullHtml;
     }
+
+    document.querySelectorAll('input').forEach(input => {
+        input.addEventListener('change', saveSettings);
+    });
+
+    document.getElementById('leadTime').addEventListener('change', saveSettings);
 
     window.onload = () => { loadData(); setInterval(update, 1000); update(); };
 </script>
