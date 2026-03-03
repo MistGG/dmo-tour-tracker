@@ -126,7 +126,7 @@
             display: flex;
             flex-direction: column;
             position: relative;
-            z-index: 10; /* Keep content strictly above background visuals */
+            z-index: 10;
         }
 
         /* --- Global Top Header --- */
@@ -272,7 +272,6 @@
         .boss-card.event-active {
             border-left-color: var(--event);
             border-color: var(--event);
-            /* Use a solid dark color tinted with orange to block background pass icons */
             background: #1c1814; 
             box-shadow: 0 0 15px rgba(255, 159, 67, 0.1);
         }
@@ -412,7 +411,7 @@
             width: 100%;
             height: 100%;
             pointer-events: none;
-            z-index: 1; /* Strictly behind the main content area */
+            z-index: 1; 
             overflow: hidden;
             display: none;
         }
@@ -438,8 +437,7 @@
             width: 100%;
             height: 100vh;
             pointer-events: none;
-            z-index: 0; /* Bottom-most layer */
-            /* Adjusted radial gradient to fade softly over a large area */
+            z-index: 0; 
             background: radial-gradient(circle at 50% 0%, rgba(255, 159, 67, 0.15) 0%, transparent 85%);
             opacity: 0;
             transition: opacity 2s ease;
@@ -610,17 +608,17 @@
         { id: 'beelzebumon_2', name: "Beelzebumon", map: "Forest", buff: "Goggle farming", type: "interval", interval: 90, refMinute: 1187, liveDuration: 100, label: "Forest Tour", lClass: "label-forest", category: "forest" },
         { id: 'zhuqiaomon', name: "Zhuqiaomon", map: "Forest", buff: "Goggle farming", type: "interval", interval: 90, refMinute: 1189, liveDuration: 100, label: "Forest Tour", lClass: "label-forest", category: "forest" },
 
-        // TOKYO TOURS (1.5h Interval, sequential 3m windows, starts 22:56 UTC)
-        // Note: Map names cleaned of brackets
-        { id: 'tokyo_myotismon_1', name: "Myotismon", map: "Big Sight", buff: "Digivice Farming", type: "interval", interval: 90, refMinute: 1376, liveDuration: 180, label: "Tokyo Tour", lClass: "label-tokyo", rotation: 'standard', category: "tokyo" },
-        { id: 'tokyo_darktyrannomon', name: "DarkTyrannomon", map: "Big Sight", buff: "Digivice Farming", type: "interval", interval: 90, refMinute: 1379, liveDuration: 180, label: "Tokyo Tour", lClass: "label-tokyo", rotation: 'reverse', category: "tokyo" },
-        { id: 'tokyo_groundramon', name: "Groundramon and Okuwamon", map: "Odaiba", buff: "Digivice Farming", type: "interval", interval: 90, refMinute: 1382, liveDuration: 180, label: "Tokyo Tour", lClass: "label-tokyo", rotation: 'standard', category: "tokyo" },
-        { id: 'tokyo_myotismon_2', name: "Myotismon", map: "Minato City", buff: "Digivice Farming", type: "interval", interval: 90, refMinute: 1385, liveDuration: 180, label: "Tokyo Tour", lClass: "label-tokyo", rotation: 'standard', category: "tokyo" },
-        { id: 'tokyo_myotismon_3', name: "Myotismon", map: "Shibuya", buff: "Digivice Farming", type: "interval", interval: 90, refMinute: 1388, liveDuration: 180, label: "Tokyo Tour", lClass: "label-tokyo", rotation: 'standard', category: "tokyo" },
-        { id: 'tokyo_phantomon', name: "Phantomon", map: "Shibuya", buff: "Digivice Farming", type: "interval", interval: 90, refMinute: 1391, liveDuration: 180, label: "Tokyo Tour", lClass: "label-tokyo", rotation: 'reverse', category: "tokyo" },
-        { id: 'tokyo_raremon', name: "Raremon", map: "Shibuya", buff: "Digivice Farming", type: "interval", interval: 90, refMinute: 1394, liveDuration: 180, label: "Tokyo Tour", lClass: "label-tokyo", rotation: 'standard', category: "tokyo" },
-        { id: 'tokyo_mammothmon', name: "Mammothmon", map: "Valley of Light", buff: "Digivice Farming", type: "interval", interval: 90, refMinute: 1397, liveDuration: 180, label: "Tokyo Tour", lClass: "label-tokyo", rotation: 'standard', category: "tokyo" },
-        { id: 'tokyo_aquilamon', name: "Aquilamon", map: "Valley of Light", buff: "Digivice Farming", type: "interval", interval: 90, refMinute: 1400, liveDuration: 180, label: "Tokyo Tour", lClass: "label-tokyo", rotation: 'reverse', category: "tokyo" }
+        // TOKYO TOURS (1.5h Interval, sequential windows, starts 22:56 UTC)
+        // Adjusting stagger: 3 mins active + 2 mins gap = 5 min intervals
+        { id: 'tokyo_myotismon_1', name: "Myotismon", map: "Big Sight", buff: "Digivice Farming", type: "interval", interval: 90, refMinute: 1376, liveDuration: 180, label: "Tokyo Tour", lClass: "label-tokyo", rotation: 'standard', category: "tokyo", timing: 'special' },
+        { id: 'tokyo_darktyrannomon', name: "DarkTyrannomon", map: "Big Sight", buff: "Digivice Farming", type: "interval", interval: 90, refMinute: 1381, liveDuration: 180, label: "Tokyo Tour", lClass: "label-tokyo", rotation: 'reverse', category: "tokyo", timing: 'special' },
+        { id: 'tokyo_groundramon', name: "Groundramon and Okuwamon", map: "Odaiba", buff: "Digivice Farming", type: "interval", interval: 90, refMinute: 1386, liveDuration: 180, label: "Tokyo Tour", lClass: "label-tokyo", rotation: 'standard', category: "tokyo", timing: 'standard' },
+        { id: 'tokyo_myotismon_2', name: "Myotismon", map: "Minato City", buff: "Digivice Farming", type: "interval", interval: 90, refMinute: 1391, liveDuration: 180, label: "Tokyo Tour", lClass: "label-tokyo", rotation: 'standard', category: "tokyo", timing: 'standard' },
+        { id: 'tokyo_myotismon_3', name: "Myotismon", map: "Shibuya", buff: "Digivice Farming", type: "interval", interval: 90, refMinute: 1396, liveDuration: 180, label: "Tokyo Tour", lClass: "label-tokyo", rotation: 'standard', category: "tokyo", timing: 'standard' },
+        { id: 'tokyo_phantomon', name: "Phantomon", map: "Shibuya", buff: "Digivice Farming", type: "interval", interval: 90, refMinute: 1401, liveDuration: 180, label: "Tokyo Tour", lClass: "label-tokyo", rotation: 'reverse', category: "tokyo", timing: 'standard' },
+        { id: 'tokyo_raremon', name: "Raremon", map: "Shibuya", buff: "Digivice Farming", type: "interval", interval: 90, refMinute: 1406, liveDuration: 180, label: "Tokyo Tour", lClass: "label-tokyo", rotation: 'standard', category: "tokyo", timing: 'standard' },
+        { id: 'tokyo_mammothmon', name: "Mammothmon", map: "Valley of Light", buff: "Digivice Farming", type: "interval", interval: 90, refMinute: 1411, liveDuration: 180, label: "Tokyo Tour", lClass: "label-tokyo", rotation: 'standard', category: "tokyo", timing: 'standard' },
+        { id: 'tokyo_aquilamon', name: "Aquilamon", map: "Valley of Light", buff: "Digivice Farming", type: "interval", interval: 90, refMinute: 1416, liveDuration: 180, label: "Tokyo Tour", lClass: "label-tokyo", rotation: 'reverse', category: "tokyo", timing: 'standard' }
     ];
 
     const specialEvents = [
@@ -789,15 +787,14 @@
                 const timeLeft = getNextSpawn(t);
                 const interval = t.type === 'hourly' ? 3600 : t.interval * 60;
                 
-                // Adjustment: Tokyo bosses spawn 10 seconds before listed time
-                const offsetAdjustment = (t.category === 'tokyo') ? 10 : 0;
+                // Adjustment: Only specific Tokyo bosses spawn 10 seconds before listed time
+                const offsetAdjustment = (t.category === 'tokyo' && t.timing === 'special') ? 10 : 0;
                 const elapsed = (interval - timeLeft + offsetAdjustment) % interval;
                 const isLive = elapsed < t.liveDuration;
                 
                 let channel = null;
                 if (isLive) {
                     if (t.label === 'Spiral Tour') {
-                        // 1m 30s active, 30s swap
                         if (elapsed < 90) channel = "ch 0";
                         else if (elapsed < 120) channel = "Swap to Ch 1";
                         else if (elapsed < 210) channel = "ch 1";
@@ -805,30 +802,27 @@
                         else if (elapsed < 330) channel = "ch 2";
                         else channel = "Finished";
                     } else if (t.label === 'Tokyo Tour') {
-                        // 35s active, 25s swap/downtime
                         const seq = t.rotation === 'reverse' ? ["ch 2", "ch 1", "ch 0"] : ["ch 0", "ch 1", "ch 2"];
                         const cycleIndex = Math.floor(elapsed / 60);
                         const innerElapsed = elapsed % 60;
                         
-                        if (innerElapsed < 35) {
-                            channel = seq[cycleIndex];
-                        } else if (cycleIndex < 2) {
-                            channel = "Swap to " + seq[cycleIndex + 1];
+                        if (t.timing === 'special') {
+                            if (innerElapsed < 35) channel = seq[cycleIndex];
+                            else if (cycleIndex < 2) channel = "Swap to " + seq[cycleIndex + 1];
+                            else channel = "Finished";
                         } else {
-                            channel = "Finished";
+                            if (cycleIndex < 3) channel = seq[cycleIndex];
+                            else channel = "Finished";
                         }
                     }
                 }
 
-                // If Tokyo Tour and we are in the 10s pre-spawn window, we want to show countdown to -10s
-                // but for simplicity, we just keep the standard countdown
                 return { ...t, timeLeft, isLive, liveRemaining: isLive ? (t.liveDuration - elapsed) : 0, channel };
             });
 
         const tourData = processItems(tours);
         const eventData = processItems(specialEvents);
 
-        // Handle Event Visual Effects
         const ogPassLive = eventData.some(e => e.id === 'ogpass' && e.isLive);
         const rainContainer = document.getElementById('eventRainContainer');
         const shineOverlay = document.getElementById('eventShineOverlay');
