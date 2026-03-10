@@ -1,4 +1,15 @@
 (function() {
+    var p = typeof location !== 'undefined' && location.pathname;
+    if (p) {
+        var path = p.replace(/\/$/, '') || '/';
+        var parts = path.split('/').filter(Boolean);
+        var pageNames = ['news', 'guides', 'guide', 'timers'];
+        var inSubfolder = parts.length > 1 || (parts.length === 1 && pageNames.indexOf(parts[0]) !== -1);
+        window.DMO_BASE = inSubfolder ? '../' : '';
+    } else {
+        window.DMO_BASE = '';
+    }
+
     function toggleSidebar() {
         var sidebar = document.getElementById('sidebar');
         var main = document.querySelector('.main-wrapper');

@@ -9,6 +9,7 @@
         var it = newsItems[index];
         var cardImg = cardImgDefault;
         var imgSrc = it.image || cardImg;
+        if (imgSrc && !imgSrc.startsWith('/') && !imgSrc.startsWith('http')) imgSrc = (window.DMO_BASE || '') + imgSrc.replace(/^\//, '');
         document.getElementById('newsArticleImage').src = imgSrc;
         document.getElementById('newsArticleImage').onerror = function() { this.onerror = null; this.src = cardImg; };
         document.getElementById('newsArticleDate').textContent = it.date || '';
@@ -67,12 +68,14 @@
     window.addEventListener('hashchange', checkHash);
     window.addEventListener('popstate', checkHash);
 
-    fetch('json/news.json')
+    fetch((window.DMO_BASE || '') + 'json/news.json')
         .then(function(r) { return r.json(); })
         .then(function(data) {
             var items = data.items || [];
             newsItems = items;
             cardImgDefault = data.defaultCardImage || cardImgDefault;
+            var base = window.DMO_BASE || '';
+            if (cardImgDefault && !cardImgDefault.startsWith('/') && !cardImgDefault.startsWith('http')) cardImgDefault = base + cardImgDefault.replace(/^\//, '');
             if (items.length === 0) {
                 empty.style.display = 'block';
                 if (content) content.style.display = 'none';
@@ -82,9 +85,10 @@
             checkHash();
             items.forEach(function(it, i) {
                 var imgSrc = it.image || cardImgDefault;
+                if (imgSrc && !imgSrc.startsWith('/') && !imgSrc.startsWith('http')) imgSrc = (window.DMO_BASE || '') + imgSrc.replace(/^\//, '');
                 var a = document.createElement('a');
                 a.className = 'news-card';
-                a.href = 'news.html#article-' + i;
+                a.href = '#article-' + i;
                 a.setAttribute('data-index', i);
                 a.innerHTML = '<img class="news-card-image" src="' + imgSrc + '" alt="" onerror="this.onerror=null;this.src=\'' + cardImgDefault + '\'">' +
                     '<div class="news-card-body">' +
@@ -93,7 +97,7 @@
                     '<div class="news-card-desc">' + (it.excerpt || '') + '</div>' +
                     '</div>';
                 a.addEventListener('click', function(e) {
-                    if (window.location.pathname.indexOf('news.html') !== -1 || window.location.href.indexOf('news.html') !== -1) {
+                    if (window.location.pathname.indexOf('/news') !== -1) {
                         e.preventDefault();
                         history.pushState(null, '', window.location.pathname + window.location.search + '#article-' + i);
                         showArticle(i);

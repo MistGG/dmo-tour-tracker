@@ -3,12 +3,13 @@
     var empty = document.getElementById('guidesEmpty');
     if (!container) return;
 
-    fetch('json/guides.json')
+    fetch((window.DMO_BASE || '') + 'json/guides.json')
         .then(function(r) { return r.json(); })
         .then(function(data) {
             var items = data.items || [];
             var categories = data.categories || ['Roles', 'Digimon', 'Dungeons'];
             var defaultImg = data.defaultImage || 'images/oddysey_logo.png';
+            if (defaultImg && !defaultImg.startsWith('/') && !defaultImg.startsWith('http')) defaultImg = (window.DMO_BASE || '') + defaultImg.replace(/^\//, '');
 
             var byCategory = {};
             categories.forEach(function(cat) { byCategory[cat] = []; });
@@ -36,9 +37,10 @@
 
                 list.forEach(function(it) {
                     var imgSrc = it.image || defaultImg;
+                    if (imgSrc && !imgSrc.startsWith('/') && !imgSrc.startsWith('http')) imgSrc = (window.DMO_BASE || '') + imgSrc.replace(/^\//, '');
                     var a = document.createElement('a');
                     a.className = 'guide-card';
-                    a.href = 'guide.html#' + it._idx;
+                    a.href = (window.DMO_BASE || '') + 'guide/#' + it._idx;
                     a.innerHTML = '<img class="guide-card-image" src="' + imgSrc + '" alt="" onerror="this.onerror=null;this.src=\'' + defaultImg + '\'">' +
                         '<div class="guide-card-body">' +
                         '<div class="guide-card-title">' + (it.title || '') + '</div>' +

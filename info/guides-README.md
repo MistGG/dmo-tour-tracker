@@ -1,12 +1,10 @@
 # Guides (json/guides.json)
 
-Guides are listed on **guides.html** by category (Roles, Digimon, Dungeons). Data is loaded from **json/guides.json**. Clicking a guide opens **guide.html** with that guide's full page: **large image on the left**, **markdown article on the right**.
-
 ## Format
 
 - **defaultImage** – default image for cards and for the detail page if a guide has no **image** (e.g. `"images/oddysey_logo.png"`).
 - **categories** – section order: `["Roles", "Digimon", "Dungeons"]`.
-- **items** – array of guides. Order in the array sets the URL: first guide = `guide.html#0`, second = `guide.html#1`, etc. Each guide has:
+- **items** – array of guides. Order in the array sets the URL: first guide = `/guide/#0`, second = `/guide/#1`, etc. Each guide has:
   - **category** – `"Roles"`, `"Digimon"`, or `"Dungeons"`.
   - **date** – (optional) `"YYYY-MM-DD"` for the home **Updates** feed (newest first). If omitted, the guide may sort last.
   - **title** – guide title (used on the card and on the detail page).

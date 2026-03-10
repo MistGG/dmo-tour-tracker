@@ -3,12 +3,15 @@
     if (!list) return;
     var thumbNews = 'images/oddysey_logo.png';
     var thumbGuides = 'images/oddysey_logo.png';
-    Promise.all([fetch('json/news.json').then(function(r) { return r.json(); }), fetch('json/guides.json').then(function(r) { return r.json(); })])
+    Promise.all([fetch((window.DMO_BASE || '') + 'json/news.json').then(function(r) { return r.json(); }), fetch((window.DMO_BASE || '') + 'json/guides.json').then(function(r) { return r.json(); })])
         .then(function(results) {
             var newsData = results[0];
             var guidesData = results[1];
             thumbNews = newsData.defaultThumbnail || thumbNews;
             thumbGuides = guidesData.defaultImage || thumbGuides;
+            var base = window.DMO_BASE || '';
+            if (thumbNews && !thumbNews.startsWith('/') && !thumbNews.startsWith('http')) thumbNews = base + thumbNews.replace(/^\//, '');
+            if (thumbGuides && !thumbGuides.startsWith('/') && !thumbGuides.startsWith('http')) thumbGuides = base + thumbGuides.replace(/^\//, '');
             var newsItems = newsData.items || [];
             var guideItems = guidesData.items || [];
             var combined = [];
@@ -20,7 +23,7 @@
                     title: it.title || '',
                     excerpt: it.excerpt || '',
                     image: it.image || thumbNews,
-                    href: 'news.html#article-' + i
+                    href: (window.DMO_BASE || '') + 'news/#article-' + i
                 });
             });
             guideItems.forEach(function(g, j) {
@@ -32,14 +35,14 @@
                     title: g.title || '',
                     excerpt: g.excerpt || '',
                     image: g.image || thumbGuides,
-                    href: 'guide.html#' + j
+                    href: (window.DMO_BASE || '') + 'guide/#' + j
                 });
             });
             combined.sort(function(a, b) { return b.dateSort.localeCompare(a.dateSort); });
             var showCount = Math.min(10, combined.length);
             for (var k = 0; k < showCount; k++) {
                 var u = combined[k];
-                var imgSrc = u.image;
+                var imgSrc = (u.image && (u.image.startsWith('/') || u.image.startsWith('http'))) ? u.image : base + (u.image || '').replace(/^\//, '');
                 var thumb = u.type === 'news' ? thumbNews : thumbGuides;
                 var a = document.createElement('a');
                 a.className = 'news-item updates-item';

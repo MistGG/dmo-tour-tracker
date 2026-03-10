@@ -27,11 +27,12 @@
             revealGuide();
             return;
         }
-        fetch('json/guides.json')
+        fetch((window.DMO_BASE || '') + 'json/guides.json')
             .then(function(r) { return r.json(); })
             .then(function(data) {
                 var items = data.items || [];
                 var defaultImg = data.defaultImage || 'images/oddysey_logo.png';
+                if (defaultImg && !defaultImg.startsWith('/') && !defaultImg.startsWith('http')) defaultImg = (window.DMO_BASE || '') + defaultImg.replace(/^\//, '');
                 if (idx >= items.length) {
                     layout.style.display = 'none';
                     notFound.style.display = 'block';
@@ -48,6 +49,7 @@
                 layout.style.display = 'flex';
                 notFound.style.display = 'none';
                 var imgSrc = g.image || defaultImg;
+                if (imgSrc && !imgSrc.startsWith('/') && !imgSrc.startsWith('http')) imgSrc = (window.DMO_BASE || '') + imgSrc.replace(/^\//, '');
                 imgEl.src = imgSrc;
                 imgEl.onerror = function() { this.onerror = null; this.src = defaultImg; };
                 document.title = (g.title || 'Guide') + ' | DM:Odyssey Tools';
