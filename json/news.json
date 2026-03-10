@@ -3,6 +3,14 @@
   "defaultCardImage": "images/oddysey_logo.png",
   "items": [
     {
+      "date": "March 10 2026",
+      "dateSort": "2026-03-10",
+      "title": "Additional Action/Hotbar space",
+      "excerpt": "Ipoii uploaded a teaser about expanded hotbar space",
+      "link": "news.html",
+      "body": "<p>DM:Odyssey support additional action/hotbar space slots from F9/9-F12/=.</p><p>This is due to the new custom skills digimon have, role skills and new items.</p><div class=\"video-embed\"><iframe src=\"https://www.youtube.com/embed/sjq8zCf8\" title=\"YouTube Short\" allowfullscreen></iframe></div>"
+    },
+    {
       "date": "March 9 2026",
       "dateSort": "2026-03-09",
       "title": "New QoL info!",
