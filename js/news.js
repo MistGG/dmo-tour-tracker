@@ -83,28 +83,65 @@
                 return;
             }
             checkHash();
-            items.forEach(function(it, i) {
-                var imgSrc = it.image || cardImgDefault;
-                if (imgSrc && !imgSrc.startsWith('/') && !imgSrc.startsWith('http')) imgSrc = (window.DMO_BASE || '') + imgSrc.replace(/^\//, '');
-                var a = document.createElement('a');
-                a.className = 'news-card';
-                a.href = '#article-' + i;
-                a.setAttribute('data-index', i);
-                a.innerHTML = '<img class="news-card-image" src="' + imgSrc + '" alt="" onerror="this.onerror=null;this.src=\'' + cardImgDefault + '\'">' +
-                    '<div class="news-card-body">' +
-                    '<div class="news-card-date">' + (it.date || '') + '</div>' +
-                    '<div class="news-card-title">' + (it.title || '') + '</div>' +
-                    '<div class="news-card-desc">' + (it.excerpt || '') + '</div>' +
-                    '</div>';
-                a.addEventListener('click', function(e) {
+            list.innerHTML = '';
+            var base = window.DMO_BASE || '';
+
+            if (items.length >= 1) {
+                var hero = items[0];
+                var heroImg = hero.image || cardImgDefault;
+                if (heroImg && !heroImg.startsWith('/') && !heroImg.startsWith('http')) heroImg = base + heroImg.replace(/^\//, '');
+                var heroEl = document.createElement('a');
+                heroEl.className = 'news-hero';
+                heroEl.href = '#article-0';
+                heroEl.setAttribute('data-index', 0);
+                heroEl.innerHTML = '<div class="news-hero-inner">' +
+                    '<div class="news-hero-img-wrap"><img src="' + heroImg + '" alt="" onerror="this.onerror=null;this.src=\'' + cardImgDefault + '\'"></div>' +
+                    '<div class="news-hero-body">' +
+                    '<div class="news-hero-date">' + (hero.date || '') + '</div>' +
+                    '<h2 class="news-hero-title">' + (hero.title || '') + '</h2>' +
+                    '<p class="news-hero-excerpt">' + (hero.excerpt || '') + '</p>' +
+                    '</div></div>';
+                heroEl.addEventListener('click', function(e) {
                     if (window.location.pathname.indexOf('/news') !== -1) {
                         e.preventDefault();
-                        history.pushState(null, '', window.location.pathname + window.location.search + '#article-' + i);
-                        showArticle(i);
+                        history.pushState(null, '', window.location.pathname + window.location.search + '#article-0');
+                        showArticle(0);
                     }
                 });
-                list.appendChild(a);
-            });
+                list.appendChild(heroEl);
+            }
+
+            if (items.length > 1) {
+                var restWrap = document.createElement('div');
+                restWrap.className = 'news-list-rest';
+                for (var i = 1; i < items.length; i++) {
+                    var it = items[i];
+                    var imgSrc = it.image || cardImgDefault;
+                    if (imgSrc && !imgSrc.startsWith('/') && !imgSrc.startsWith('http')) imgSrc = base + imgSrc.replace(/^\//, '');
+                    var a = document.createElement('a');
+                    a.className = 'news-list-item';
+                    a.href = '#article-' + i;
+                    a.setAttribute('data-index', i);
+                    a.innerHTML = '<div class="news-list-thumb"><img src="' + imgSrc + '" alt="" onerror="this.onerror=null;this.src=\'' + cardImgDefault + '\'"></div>' +
+                        '<div class="news-list-body">' +
+                        '<div class="news-list-date">' + (it.date || '') + '</div>' +
+                        '<div class="news-list-title">' + (it.title || '') + '</div>' +
+                        '<p class="news-list-excerpt">' + (it.excerpt || '') + '</p>' +
+                        '</div>' +
+                        '<span class="news-list-arrow">→</span>';
+                    (function(idx) {
+                        a.addEventListener('click', function(e) {
+                            if (window.location.pathname.indexOf('/news') !== -1) {
+                                e.preventDefault();
+                                history.pushState(null, '', window.location.pathname + window.location.search + '#article-' + idx);
+                                showArticle(idx);
+                            }
+                        });
+                    })(i);
+                    restWrap.appendChild(a);
+                }
+                list.appendChild(restWrap);
+            }
             revealNewsMain();
         })
         .catch(function() {
